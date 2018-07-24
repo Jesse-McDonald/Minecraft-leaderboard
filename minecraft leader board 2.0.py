@@ -147,11 +147,11 @@ for player in players:
                     stats[key].min(player.stats[key],player.name)
                else:
                     stats[key]=Stat(key,player.stats[key],player.name)
-file=open(path+"\Leader Board.txt",'w')
+file=open(path+"/Leader Board.txt",'w')
 for key in stats:
      #print (stats[key])
      file.write("\n"+str(stats[key]))
-print("wrote summary to "+path+"\\Leader Board.txt")
+print("wrote summary to "+path+"/Leader Board.txt")
 file.close()
 print("Writing names of all players")
 file=open(path+"/Names.txt",'w')
