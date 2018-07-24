@@ -12,8 +12,10 @@ def load_obj(name ):
     with open('obj/' + name + '.pkl', 'rb') as f:
         return pickle.load(f)
 players=[]
-uuids=load_obj("uuid")
-
+try:
+	uuids=load_obj("uuid")
+except:
+	uuids={}
 stats=dict()
 class StatPare:
     def __init__(self,name,value):
@@ -86,11 +88,15 @@ class Player:
           try:
                page = urlopen(Request("http://namemc.com/profile/"+uuid,headers={'User-Agent' : "Magic Browser"}))
                page=str(page.read());
-               start=page.find("<h1>")
+               #print(page)
+	 
+               start=page.find("<h1 translate=\"no\">")              
                end=page.find("</h1>")
-               self.name=page[start+4:end]
-               self.name=self.name[self.name.find('>')+1:-1]
-               self.name=self.name[0:self.name.find('<')]
+               self.name=page[start:end]
+               #print(self.name)
+               self.name=self.name[self.name.find('>')+1:]
+   
+               #print(self.name)
                #page=page[0:start]+page[end+5:-1]
           except:
                self.mcuuid(uuid)
