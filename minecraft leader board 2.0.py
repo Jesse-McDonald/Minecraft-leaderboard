@@ -155,16 +155,24 @@ print("wrote summary to "+path+"/Leader Board.txt")
 file.close()
 print("Writing names of all players")
 file=open(path+"/Names.txt",'w')
+playerList=[]
 for player in players:
-
-     file.write("\n"+str(player))
-
+    file.write("\n"+str(player))
+players.sort(key=lambda x: x.name,reverse=False)
 file.close()
 file=open(path+"/total.txt",'w')
 print("Writing total for each stat")
+index=0
+statList=[]
 for key in globalStats:
     file.write("\n"+str(key)+": "+str(globalStats[key]))
+    statList.append(key)
+statList.sort(key=lambda x: x,reverse=False)
+for stat in statList:
+    index+=1
+print(statList)
 file.close()
+
 print("writing comprehensive summary of each stat")
 for key in fullStats:
     fullStats[key].sort(key=lambda x: x.value,reverse=True)
@@ -180,6 +188,23 @@ for key in fullStats:
         total+=p.value
     file.write("Total "+ str(total))
     file.close()
-print("Finished writing comprehensive summary, it is avaliable in"+path+"\\full")
+print("Finished writing comprehensive summary, it is avaliable in "+path+"\\full")
 save_obj(uuids,"uuid")
 save_obj(players,"players")
+print("Working on comprehensive csv")
+file=open(path+"/stats.csv","w")
+header="Player Name"
+for stat in statList:
+    header+=","+stat
+file.write(header+"\n")
+for player in players:
+    line=player.name
+    for stat in statList:
+        if stat in player.stats:
+            line+=","+str(player.stats[stat])
+        else:
+            line+=",0"
+    file.write(line+"\n")
+file.close()
+print("Finished")
+
