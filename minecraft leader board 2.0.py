@@ -12,8 +12,10 @@ def load_obj(name ):
     with open('obj/' + name + '.pkl', 'rb') as f:
         return pickle.load(f)
 players=[]
-uuids=load_obj("uuid")
-
+try:
+	uuids=load_obj("uuid")
+except:
+	uuids={}
 stats=dict()
 class StatPare:
     def __init__(self,name,value):
@@ -86,11 +88,15 @@ class Player:
           try:
                page = urlopen(Request("http://namemc.com/profile/"+uuid,headers={'User-Agent' : "Magic Browser"}))
                page=str(page.read());
-               start=page.find("<h1>")
+               #print(page)
+	 
+               start=page.find("<h1 translate=\"no\">")              
                end=page.find("</h1>")
-               self.name=page[start+4:end]
-               self.name=self.name[self.name.find('>')+1:-1]
-               self.name=self.name[0:self.name.find('<')]
+               self.name=page[start:end]
+               #print(self.name)
+               self.name=self.name[self.name.find('>')+1:]
+   
+               #print(self.name)
                #page=page[0:start]+page[end+5:-1]
           except:
                self.mcuuid(uuid)
@@ -141,24 +147,32 @@ for player in players:
                     stats[key].min(player.stats[key],player.name)
                else:
                     stats[key]=Stat(key,player.stats[key],player.name)
-file=open(path+"\Leader Board.txt",'w')
+file=open(path+"/Leader Board.txt",'w')
 for key in stats:
      #print (stats[key])
      file.write("\n"+str(stats[key]))
-print("wrote summary to "+path+"\\Leader Board.txt")
+print("wrote summary to "+path+"/Leader Board.txt")
 file.close()
 print("Writing names of all players")
 file=open(path+"/Names.txt",'w')
+playerList=[]
 for player in players:
-
-     file.write("\n"+str(player))
-
+    file.write("\n"+str(player))
+players.sort(key=lambda x: x.name,reverse=False)
 file.close()
 file=open(path+"/total.txt",'w')
 print("Writing total for each stat")
+index=0
+statList=[]
 for key in globalStats:
     file.write("\n"+str(key)+": "+str(globalStats[key]))
+    statList.append(key)
+statList.sort(key=lambda x: x,reverse=False)
+for stat in statList:
+    index+=1
+print(statList)
 file.close()
+
 print("writing comprehensive summary of each stat")
 for key in fullStats:
     fullStats[key].sort(key=lambda x: x.value,reverse=True)
@@ -174,6 +188,23 @@ for key in fullStats:
         total+=p.value
     file.write("Total "+ str(total))
     file.close()
-print("Finished writing comprehensive summary, it is avaliable in"+path+"\\full")
+print("Finished writing comprehensive summary, it is avaliable in "+path+"\\full")
 save_obj(uuids,"uuid")
 save_obj(players,"players")
+print("Working on comprehensive csv")
+file=open(path+"/stats.csv","w")
+header="Player Name"
+for stat in statList:
+    header+=","+stat
+file.write(header+"\n")
+for player in players:
+    line=player.name
+    for stat in statList:
+        if stat in player.stats:
+            line+=","+str(player.stats[stat])
+        else:
+            line+=",0"
+    file.write(line+"\n")
+file.close()
+print("Finished")
+
