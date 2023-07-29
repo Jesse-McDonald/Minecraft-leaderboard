@@ -1,0 +1,88 @@
+body {
+	font-family: Arial, sans-serif;
+	padding: 20px;
+}
+.list-item {
+	height:2em;
+	display:flex;
+}
+.progress-bar {
+	//height: 100%;
+	display:inline-block;
+	flex-grow: 1;
+	background-color: #f0f0f0;
+}
+.progress-bar-fill {
+	height: 100%;
+	background-color: #C00;
+	z-index:-1;
+
+	
+}
+.rank{
+	width:3em;
+}
+.name{
+	width:14em;
+	justify-content:left;
+	padding-left:4pt;
+}
+.number{
+	width:10em;
+}
+.percentage{
+	width:4em;
+}
+
+span {
+	height:100%;
+	border: black 1pt solid;
+	padding-right:2pt;
+	display:flex;
+    align-items: center;
+    justify-content: right;
+	margin: auto;
+	text-align:right;
+	border
+}
+#listContainer{
+	list-style: none;
+	max-height:calc( 100% - 10pt - 8em );
+	overflow-y: auto;
+	margin-bottom:none;
+    padding-bottom: 1pt;
+
+}
+body{
+	padding:0;
+	height:100%;
+	margin:0;
+	padding-left:2em;
+}
+head{
+	height:0;
+	margin:0;
+}
+html{
+	height:100%;
+}
+ul{
+	margin:0pt;
+	padding:0pt;
+}
+h1{
+	padding:10pt;
+	margin:0;
+	padding-left:0;
+}
+body > *{
+	margin-bottom:4pt;
+}
+input{
+	height:2em;
+	width: calc(100% - 8pt );
+	border-radius: .5em;
+}
+a{
+    color: #C00;	
+}

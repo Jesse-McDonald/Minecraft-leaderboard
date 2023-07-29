@@ -8,6 +8,9 @@ from time import sleep
 import pickle
 from mojang import API
 api = API()
+def mkdir(path):
+	if not os.path.exists(path):
+		os.makedirs(path)
 def save_obj(obj, name ):
 	with open('obj/'+ name + '.pkl', 'wb') as f:
 		pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
@@ -51,6 +54,7 @@ class Stat:
 					self.maxPlr.append(name)
 	def __str__(self):
 			return "Most:	"+self.name+": "+str(self.maxV)+" "+str(self.maxPlr)+"\nLeast: "+self.name+": "+str(self.minV)+" "+str(self.minPlr)
+		
 #stats.append(Stat("generic",0,"none"))
 globalStats =dict()
 class Player:
@@ -70,7 +74,7 @@ class Player:
 			if self.name=="Useful Minecraft Resources":
 				print(uuid)
 			#print(page)
-			print("Name: "+self.name)
+			print("Name: "+str(self.name))
 			
 	def mcuuid(self,uuid):
 			i=0
@@ -165,8 +169,8 @@ def extract(path,name):
 	
 def dirin(mypath):
 	for (dirpath, dirnames, filenames) in walk(mypath):
-		for path in dirnames:
-				dirin(dirpath+'/'+path)
+		#for path in dirnames:
+		#		dirin(dirpath+'/'+path)
 		for path in filenames:
 				extract(dirpath+'/'+path,path)
 
@@ -175,6 +179,9 @@ def dirin(mypath):
 path=input("Path directory to be checked: ")
 print("looking up UUID's, this can take quite some time")
 dirin(path)
+path+="/summary"
+mkdir(path)
+mkdir(path+"/json")
 print("Creating top and bottom summary list")
 fullStats=dict()
 for player in players:
@@ -210,34 +217,62 @@ for player in players:
 players.sort(key=lambda x: x.name,reverse=False)
 file.close()
 file=open(path+"/total.txt",'w')
+jsonfile=open(path+"/json/leaderboard.json",'w')
+jsonfile.write("[");
 print("Writing total for each stat")
 index=0
 statList=[]
+first=True
 for key in globalStats:
+	if first:
+		first=False
+	else:
+		jsonfile.write(',')
+	stat=stats[key]
 	file.write("\n"+str(key)+": "+str(globalStats[key]))
+	jsonfile.write('{"name":"'+str(key)+
+		'","total":'+str(globalStats[key])+
+		',"max":{\"amount\":'+str(stat.maxV)+
+			',\"players\":'+str(stat.maxPlr).replace("'",'"')+
+		'},"min":{\"amount\":'+str(stat.minV)+
+			',\"players\":'+str(stat.minPlr).replace("'",'"')+
+	'}}')
+
 	statList.append(key)
 statList.sort(key=lambda x: x,reverse=False)
 for stat in statList:
 	index+=1
 print(statList)
+jsonfile.write("]");
 file.close()
+jsonfile.close()
 
 print("writing comprehensive summary of each stat")
 for key in fullStats:
 	fullStats[key].sort(key=lambda x: x.value,reverse=True)
 	#print(key)
-	if not os.path.exists(path+"/full"):
-		os.makedirs(path+"/full")
+	mkdir(path+"/full")
 	file=open(path+"/full/"+key+".txt",'w+')
+	jsonfile=open(path+"/json/"+key+".json",'w+')
+	jsonfile.write("[")
 	c=0
 	total=0
 	file.write(key+"\n");
+	first=True
 	for p in fullStats[key]:
+		if first:
+			first=False
+		else:
+			jsonfile.write(',')
 		c+=1
 		file.write(str(c)+": "+str(p)+"\n")
+		
+		jsonfile.write('{"\"name\"":"'+str(p.name)+'","\"amount\"":'+str(p.value)+"}")
 		total+=p.value
 	file.write("Total "+ str(total))
+	jsonfile.write("]")
 	file.close()
+	jsonfile.close()
 print("Finished writing comprehensive summary, it is avaliable in "+path+"\\full")
 save_obj(uuids,"uuid")
 save_obj(players,"players")
