@@ -1,0 +1,73 @@
+.darkmode .progress-bar {
+	background-color: #1e1f22;
+}
+.darkmode .progress-bar-fill {
+	height: 100%;
+	background-color: #B00;
+
+	
+}
+.darkmode .total{
+	color:white;
+}
+.darkmode .list-item:nth-child(2n+1) .progress-bar-fill {
+
+	background-color: #E00;
+
+}
+
+.darkmode li span {
+	border: black 1pt solid;
+}
+
+
+.darkmode a{
+    color: #D00;	
+}
+
+.darkmode li.header div.progress-bar{
+	background-color:#171e24;
+	color:white;
+}
+.darkmode li.header *{
+background-color:#171e24;
+	color:white;
+	}
+	
+.amoledmode .progress-bar {
+	background-color: #000;
+}
+.amoledmode .progress-bar-fill {
+	height: 100%;
+	background-color: #B00;
+
+	
+}amoledmode .total{
+	color:white;
+}
+.amoledmode .list-item:nth-child(2n+1) .progress-bar-fill {
+
+	background-color: #E00;
+
+}
+
+.amoledmode li span {
+	border: gray 1pt solid;
+}
+
+
+.amoledmode a{
+    color: #D00;	
+}
+
+.amoledmode li.header div.progress-bar{
+	background-color:#171e24;
+	color:white;
+	
+	border: gray 1pt solid;
+}
+.amoledmode li.header *{
+background-color:#171e24;
+	color:white;
+	}
+	

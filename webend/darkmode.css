@@ -1,0 +1,98 @@
+.darkmode{
+	background-color: #495156;
+	color: #d1d4d7;
+}
+.darkmode h1{
+	color:white;
+}
+.darkmode input{
+	background-color: #495156;
+	color: #d1d4d7;
+}
+.darkmode input::placeholder{
+	color: #d1d4d7;
+}
+.darkmode button{
+	background: #00c0ff;
+
+}
+
+.darkmode #listContainer > li >stat{
+	color:#d1d4d7;
+	
+    box-shadow:
+        inset 0 0 2px 0 rgb(255 255 255 / 18%), 
+		inset 0 0 3px 0 rgb(239 239 239 / 40%), 
+		inset 0 0 3px 5px rgb(255 255 255 / 5%), 
+		2px 2px 4px 0 rgb(255 255 255 / 25%);
+
+}
+.darkmode #listContainer > li >stat:hover, #listContainer > li >stat:focus{
+	box-shadow:
+        inset 0 0 2px 0 rgba(255,255,255,.4),
+        inset 0 0 3px 0 rgb(160 160 255 / 40%),
+        inset 0 0 3px 5px rgb(128 128 255 / 10%),
+        8px 8px 8px 0 rgb(196 196 255 / 50%);
+}
+.darkmode header{
+	
+
+	background: #495156;
+
+}
+.darkmode .match{
+	  background: darkblue;
+}
+.amoledmode .match{
+	  background: darkblue;
+}
+.amoledmode{
+	background-color: #000;
+	color:white;
+}
+.amoledmode h1{
+	color:white;
+}
+.amoledmode input{
+	background-color: #010101;
+	color: #eee;
+}
+.amoledmode input::placeholder{
+	color: #eee;
+}
+.amoledmode button{
+	background: #00c0ff;
+
+}
+
+.amoledmode #listContainer > li >stat{
+	color:#fff;
+
+    box-shadow:
+        inset 0 0 2px 0 rgb(255 255 255 / 36%), 
+		inset 0 0 3px 0 rgb(239 239 239 / 80%), 
+		inset 0 0 3px 5px rgb(255 255 255 / 10%), 
+		2px 2px 4px 0 rgb(255 255 255 / 50%);
+
+}
+.amoledmode #listContainer > li >stat:hover, #listContainer > li >stat:focus{
+	box-shadow:
+        inset 0 0 2px 0 rgba(255,255,255,.4),
+        inset 0 0 3px 0 rgb(160 160 255 / 40%),
+        inset 0 0 3px 5px rgb(128 128 255 / 10%),
+        8px 8px 8px 0 rgb(196 196 255 / 50%);
+}
+.amoledmode header{
+	
+	background-color:black;
+}
+
+::selection {
+  background: #0f6ddd; /* WebKit/Blink Browsers */
+  color:white;
+}
+
+::-moz-selection  {
+  background: #0f6ddd; /* WebKit/Blink Browsers */
+  color:white;
+}

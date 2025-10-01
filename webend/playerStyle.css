@@ -1,0 +1,218 @@
+body {
+	font-family: Arial, sans-serif;
+	padding: 20px;
+}
+.list-item {
+	height:2em;
+	display:flex;
+}
+.progress-bar {
+	display:inline-block;
+	flex-grow: 1;
+	background-color: #f0f0f0;
+}
+.progress-bar-fill {
+	height: 100%;
+	background-color: #B00;
+	z-index:-1;
+
+	
+}
+radio{
+	padding-right:1em;
+}
+radio label{
+	cursor: pointer;
+}
+.list-item:nth-child(2n+1) .progress-bar-fill {
+	height: 100%;
+	background-color: #E00;
+	z-index:-1;
+
+	
+}
+.GWR{
+	width:6em;
+}
+.rank{
+	width:3em;
+}
+.name{
+	width:26em;
+	justify-content:left;
+	padding-left:4pt;
+}
+.number{
+	width:10em;
+}
+.percentage{
+	width:4em;
+}
+
+li span {
+	height:100%;
+	border: black 1pt solid;
+	padding-right:2pt;
+	display:flex;
+    align-items: center;
+    justify-content: right;
+	margin: auto;
+	text-align:right;
+
+}
+span#total{
+	padding-bottom:2pt;
+    font-weight: bold;
+    font-size: 2em;
+}
+.stat_link{
+	color:inherit;
+	text-decoration: none;
+}
+.stat_link:hover, .profile_link:active{
+	
+  font-weight: bold;
+}
+#searchInput, #listContainer{
+	width:600pt;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+#listContainer{
+	list-style: none;
+	max-height:calc( 100% - 10pt - 8em );
+	overflow-y: auto;
+	margin-bottom:none;
+    padding-bottom: 1pt;
+
+}
+body{
+	padding:0;
+	height:100%;
+	margin:0;
+	padding-left:2em;
+	padding-right: 2em;
+}
+head{
+	height:0;
+	margin:0;
+}
+html{
+	height:100%;
+}
+ul{
+	margin:0pt;
+	padding:0pt;
+}
+h1{
+	padding-top:10pt;
+	margin:0;
+	padding-left:0;
+}
+h1 img.inline_face{
+	height:2em;
+	padding-right: 0em;
+}
+img.inline_face{
+	height:1.75em;
+	  vertical-align: middle;
+	image-rendering: pixelated; 
+	padding-right: 0.5em;
+}
+body > *{
+	margin-bottom:4pt;
+}
+input{
+	height:2em;
+	border-radius: .5em;
+}
+a{
+    color: #C00;	
+}
+li.header{
+	position:sticky;
+	top:0;
+	z-index:10;
+	background-color:lightgray;
+	border-bottom: black 2pt solid;
+	border-top: black 2pt solid;
+	height: 3em;
+}
+li.header div.progress-bar{
+	background-color:lightgray;
+	height:calc( 100% - .5pt);
+	border: black 1pt solid;
+	padding-right:2pt;
+	padding-left:2pt;
+	display:flex;
+    align-items: center;
+    justify-content: left;
+	margin: auto;
+	text-align:left;
+}
+li.header *{
+	height:100%;
+	
+	}
+	
+	
+/* Adjust the width and positioning for 3 positions */
+/* The switch - the box around the slider */
+radio {
+  /* ... (other styles) */
+  /*width: 90px; /* Adjusted width for three positions */
+  display:block;
+  float:right;
+}
+
+/* The slider */
+radio .slider {
+  /* ... (other styles) */
+  width: 30px; /* Width for each position */
+  height:30px;
+  top:1px;
+  position:absolute;
+  display:block;
+}
+radio input{
+	display:none;
+	height:0;
+	width:0;
+	opacity:0;
+}
+
+radio label{
+	display:block;
+	float:left;
+	height:1em;
+	width:1em;
+}
+
+radio label.sanemode{
+	background-color:#fff;
+	border-radius:1em 0em 0em 1em;
+	border:solid black 2pt;
+}
+radio label.darkmode{
+
+	border-radius:0em 0em 0em 0em;
+	border:solid black 2pt;
+}
+radio label.amoledmode{
+	
+	border-radius:0em 1em 1em 0em;
+	border:solid black 2pt;
+}
+/* Position the slider for each radio button */
+radio input:nth-of-type(1):checked ~ .sanemode {
+ box-shadow: 0 0 0 2px #000;
+}
+
+radio input:nth-of-type(2):checked ~ .darkmode {
+ box-shadow: 0 0 0 2px #B6AEA9;
+}
+
+radio input:nth-of-type(3):checked ~ .amoledmode {
+ box-shadow: 0 0 0 2px #FFF;
+}
