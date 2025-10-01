@@ -102,7 +102,7 @@ def get_face(skin_uri, out_size = 8) -> Image.Image:
 			face = face.copy()
 			face = Image.alpha_composite(face, hat)
 	except Exception:
-		raise
+		pass
 	face = face.resize((out_size, out_size), resample=Image.NEAREST)
 	return face	
 def uuid_api_official(uuid):
@@ -114,7 +114,6 @@ def uuid_api_official(uuid):
 			return name, face
 		except Exception as e:
 			print("Exception while looking up UUID: "+uuid+"\n Skipped ")
-			raise
 			return uuid, None
 
 def extract(path,name):
