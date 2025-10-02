@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <title>Hermitcraft Season 9 Stats</title>
+		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="darkmode.css">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+	<header>
+		<h1>Hermitcraft Season 9 Stats <div>
+		  
+		</div>
+<button onclick="topFunction()" title="Go to top">Return To Top</button>	
+		
+	<radio>
+	  <input type="radio" onchange="activateLightMode()" name="toggle" id="saneMode" checked>
+	  <label for="saneMode" class="sanemode" title="Light Mode"></label>
+	  <input type="radio" onchange="activateDarkMode()"   name="toggle" id="darkMode">
+	  <label for="darkMode" class="darkmode" title="Dark Mode"></label> 
+	  <input type="radio" onchange="activateAmoledMode()" name="toggle" id="amoledMode"> 
+	  <label for="amoledMode" class="amoledmode" title="AMOLED Mode"></label>
+	</radio>
+</h1>
+		   <script src="script.js"></script>
+	   <input type="text" id="searchInput" placeholder="Filter by Username or Stat">
+	   <div class=filterRow>Filter By: <input checked type="checkbox" id="filterStat" name="stat" value="stat">
+  <label for="stat"> Stat Name</label><input type="checkbox" id="filterMax" name="max" value="max">
+  <label for="stat"> Max Player</label><input type="checkbox" id="filterMin" name="min" value="min">
+  <label for="stat"> Min Player</label></div>
+  <div class=filterRow>
+  <label for="sortSelect">Sort by:</label>
+		  <select id="sortSelect">
+			<option value="random" selected>Random</option>
+			<option value="alpha">By Stat Name (A to Z)</option>
+			<option value="rev-alpha">By Stat Name (Z to A)</option>
+			<option value="numeric">By Total (low to high)</option>
+			<option value="rev-numeric">By Total (high to low)</option>
+		  </select>
+
+		  <button id="shuffle">Shuffle</button></div>
+	</header>	
+	<ul id="listContainer">	</ul>
+
+</body>
+</html>

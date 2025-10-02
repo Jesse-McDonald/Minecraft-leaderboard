@@ -2,8 +2,47 @@ var searchIndex={
 	"statName":{},
 	"players":{}
 }
+function sortList(ulElement, mode) {
+  const items = Array.from(ulElement.children);
+
+  if (mode === "random") {
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+  } else if (mode === "alpha" || mode === "rev-alpha") {
+    items.sort((a, b) => {
+      const aText = (a.querySelector('.stathead')?.textContent || '').trim();
+      const bText = (b.querySelector('.stathead')?.textContent || '').trim();
+      const cmp = aText.localeCompare(bText, undefined, { sensitivity: 'base' });
+      return mode === "alpha" ? cmp : -cmp;
+    });
+  } else if (mode === "numeric" || mode === "rev-numeric") {
+    items.sort((a, b) => {
+      const aNum = parseFloat(a.querySelector('.total')?.textContent.split(":")[1].trim()) || 0;
+      const bNum = parseFloat(b.querySelector('.total')?.textContent.split(":")[1].trim()) || 0;
+      return mode === "numeric" ? (aNum - bNum) : (bNum - aNum);
+    });
+  }
+
+  items.forEach(item => ulElement.appendChild(item));
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 	
+	document.getElementById('shuffle').addEventListener("click", () => {
+		sortList(document.getElementById('listContainer'), "random");
+	});
+	document.getElementById('sortSelect').addEventListener("change", () => {
+		const value=document.getElementById('sortSelect').value;
+		if(value==="random"){
+			document.getElementById('shuffle').style.display = 'inline-block';
+		}else{
+			document.getElementById('shuffle').style.display = 'none';
+			
+		}
+		sortList(document.getElementById('listContainer'), value);
+	});
 	// Function to add list items to #listContainer
 	function addListItem(name, total, max, min) {
 		const listItem = document.createElement("li");

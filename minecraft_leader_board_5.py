@@ -117,7 +117,8 @@ def uuid_api_official(uuid):
 			return uuid, None
 
 def extract(path,name):
-	if(".json" in name):
+	try:
+		if(".json" in name):
 			player=Player(name[0:name.find('.')])
 			if((not player.name is None) and len(player.name)>2):
 				players.append(player);
@@ -129,8 +130,24 @@ def extract(path,name):
 					for subkey in jsonIn[key].keys():
 						tmpstr=subkey.replace("minecraft","")
 						players[-1].stats[(holdString+tmpstr).replace(':','.')]=jsonIn[key][subkey]
-
-
+	except Exception as e:
+		try:
+			extract_legacy(path,name)
+		except Exception:
+			raise e
+def extract_legacy(path,name):
+	if(".json" in name):
+			player=Player(name[0:name.find('.')])
+			if((not player.name is None) and len(player.name)>2):
+				players.append(player);
+				stringin=open (path,'r')
+				jsonIn=loads(stringin.read())
+				players[-1].stats={}
+				for key in jsonIn.keys():
+					if "stat." in key:
+						#holdString="";
+						#tmpstr=key.replace("minecraft","")
+						players[-1].stats[(key).replace(':','.')]=jsonIn[key]
 	
 def dirin(mypath):
 	for (dirpath, dirnames, filenames) in walk(mypath):
@@ -358,12 +375,12 @@ if __name__=="__main__":
 			file.write(stat[4]+": #"+str(stat[0]+1)+", "+str(stat[2])+"("+str(round(stat[1]))+"%)\n")
 			# rank[0], percentage[1], value[2], comp[3], name[4]
 			jsonfile.write('{"\"name\"":"'+str(stat[4])+'","\"amount\"":'+str(stat[2])+',"rank":'+str(stat[0]+1)+',"GWR":'+str(i+1)+',"percentage":'+str(stat[1])+"}")
-			htmlfile.write(f"<li class='list-item'><span class='GWR'>{i+1}:</span><span class='name'><a class='stat_link' href='../stat/{stat[4]}.html'>{stat[4]}</a></span><span class='rank'>{stat[0]+1}:</span><span class='number'>{stat[2]}</span><span class='percentage'>{round(stat[1])}%</span></li>\n")
+			htmlfile.write(f"<li class='list-item'><span class='GWR'>{i+1}:</span><span class='name'><a class='stat_link' href='../stat/{stat[4]}.html'>{stat[4]}</a></span><span class='rank'>#{stat[0]+1}</span><span class='number'>{stat[2]}</span><span class='percentage'>{round(stat[1])}%</span></li>\n")
 			
 			
 		htmlfile.write("""</ul>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-		<script src="../statsScript.js"></script>
+		<script src="../playerScript.js"></script>
 		</body>
 	</html>
 		""")

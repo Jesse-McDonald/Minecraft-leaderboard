@@ -1,11 +1,19 @@
 body {
 	font-family: Arial, sans-serif;
 	padding: 20px;
-	padding-top: 0px;
-	margin-top: 0px;
-
 }
 
+
+.filterRow{
+	display:inline-block;
+	margin-right: 100pt;
+	margin-top:0.25em;
+}
+.filterRow button{
+	  border-radius: 10pt;
+	  padding: 1pt;
+	  margin-left:1em;
+}
 input[type=text]{
 	height:2em;
 	width: calc(100% - 8pt );
