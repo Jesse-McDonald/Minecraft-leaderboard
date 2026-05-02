@@ -343,7 +343,7 @@ if __name__=="__main__":
 			<head>
 				
 				<title>{title} | {player.name}</title>
-				<link rel="icon" type="image/png" href="../faces/{player.uuid}.png">
+				<link rel="icon" type="image/png" href="../faces/{player.name}.png">
 				<link rel="stylesheet" href="../playerStyle.css">
 				<link rel="stylesheet" href="../darkmode.css">
 				<link rel="stylesheet" href="../statsDarkmode.css">
@@ -352,7 +352,7 @@ if __name__=="__main__":
 				<meta property="og:type" content="website">
 			</head>
 			<body>
-			<h1><a href="../">All Stats</a> &gt <img class='inline_face' src='../faces/{player.uuid}.png'> {player.name} <radio>
+			<h1><a href="../">All Stats</a> &gt <img class='inline_face' src='../faces/{player.name}.png'> {player.name} <radio>
 		  <input type="radio" onchange="activateLightMode()" name="toggle" id="saneMode" checked>
 		  <label for="saneMode" class="sanemode" title="Light Mode"></label>
 		  <input type="radio" onchange="activateDarkMode()"   name="toggle" id="darkMode">
