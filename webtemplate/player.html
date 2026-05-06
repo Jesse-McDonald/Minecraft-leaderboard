@@ -5,15 +5,18 @@
 				<title>{{html title}} | {{name}}</title>
 				<link rel="icon" type="image/png" href="../faces/{{name}}.png">
 				<link rel="stylesheet" href="../playerStyle.css">
+				<link rel="stylesheet" href="../unitraw.css">
 				<link rel="stylesheet" href="../darkmode.css">
 				<link rel="stylesheet" href="../statsDarkmode.css">
 				<meta property="og:title" content="{{html title}} | {{name}}">
 				<meta property="og:description" content="Top Stats:
-{{summary line}}...">
+{{stat summary line}}...">
 				<meta property="og:type" content="website">
 			</head>
 			<body>
-			<h1><a href="../">All Stats</a> &gt <img class='inline_face' src='../faces/{{name}}.png'> {{name}} <radio>
+			<h1><a href="../">All Stats</a> &gt <img class='inline_face' src='../faces/{{name}}.png'> {{name}} 
+			
+			<radio>
 		  <input type="radio" onchange="activateLightMode()" name="toggle" id="saneMode" checked>
 		  <label for="saneMode" class="sanemode" title="Light Mode"></label>
 		  <input type="radio" onchange="activateDarkMode()"   name="toggle" id="darkMode">
@@ -21,13 +24,22 @@
 		  <input type="radio" onchange="activateAmoledMode()" name="toggle" id="amoledMode"> 
 		  <label for="amoledMode" class="amoledmode" title="AMOLED Mode"></label>
 			</radio></h1>
+			<div class="unit_selector" >
+				<span>Raw</span>
+				<label class="toggle">
+					<input type="checkbox" onchange="toggleUnits()" id="unitselector">
+					<span class="slider"></span>
+				</label>
+				<span>Unit</span>
+			</div>
 			<input type="text" id="searchInput" placeholder="Filter by Stat">
 			<ul id="listContainer">
-					<li class="list-item header"><span class='GWR'>Achivement</span><span class='GWV'>Achivement</span><span class='name'>Stat</span><span class='rank'>Rank</span><span class='number'>Raw Stat</span><span class='percentage'>% of Total</span></li>
+					<li class="list-item header"><span class='GWR'>Achievement</span><span class='name'>Stat</span><span class='rank'>Rank</span><span class='number'>Stat Value</span><span class='percentage'>% of Total</span></li>
 	{{stat line}}
 </ul>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="../playerScript.js"></script>
+		<script src="../common.js"></script>
 		</body>
 	</html>
 		

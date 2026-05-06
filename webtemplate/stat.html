@@ -6,8 +6,9 @@
 				<link rel="stylesheet" href="../statsStyle.css">
 				<link rel="stylesheet" href="../darkmode.css">
 				<link rel="stylesheet" href="../statsDarkmode.css">
+				<link rel="stylesheet" href="../unitraw.css">
 				<meta property="og:title" content="{{html title}}| {{stat Name}}">
-				<meta property="og:description" content="Total: {{total}}
+				<meta property="og:description" content="Total: {{raw total}}
 {{stat summary line}}...">
 				<meta property="og:type" content="website">
 			</head>
@@ -20,7 +21,15 @@
 		  <input type="radio" onchange="activateAmoledMode()" name="toggle" id="amoledMode"> 
 		  <label for="amoledMode" class="amoledmode" title="AMOLED Mode"></label>
 			</radio></h1>
-			<span class="total" id="total">Total: {{total}}</span>
+			<span class="total" id="total">Total: {{total}} ({{raw total}})</span>
+			<div class="unit_selector" >
+				<span>Raw</span>
+				<label class="toggle">
+					<input type="checkbox" onchange="toggleUnits()" id="unitselector">
+					<span class="slider"></span>
+				</label>
+				<span>Unit</span>
+			</div>
 			<input type="text" id="searchInput" placeholder="Filter by Username">
 			<ul id="listContainer">
 					<li class="list-item header"><span class='rank'>Rank</span><span class='name'>Username</span><span class='number'>Raw Stat</span><span class='percentage'>% of Total</span><div class='progress-bar header'> Distribution</div></li>
@@ -28,6 +37,7 @@
 </ul>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="../statsScript.js"></script>
+		<script src="../common.js"></script>
 		</body>
 	</html>
 		

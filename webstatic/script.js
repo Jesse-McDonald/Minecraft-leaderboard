@@ -1,355 +1,255 @@
-var searchIndex={
-	"statName":{},
-	"players":{}
-}
+var searchIndex = {
+	statName: {},
+	players: {}
+};
+
+let visibleItems = new Set();
+
 function sortList(ulElement, mode) {
-  const items = Array.from(ulElement.children);
+	const items = Array.from(ulElement.children);
 
-  if (mode === "random") {
-    for (let i = items.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [items[i], items[j]] = [items[j], items[i]];
-    }
-  } else if (mode === "alpha" || mode === "rev-alpha") {
-    items.sort((a, b) => {
-      const aText = (a.querySelector('.stathead')?.textContent || '').trim();
-      const bText = (b.querySelector('.stathead')?.textContent || '').trim();
-      const cmp = aText.localeCompare(bText, undefined, { sensitivity: 'base' });
-      return mode === "alpha" ? cmp : -cmp;
-    });
-  } else if (mode === "numeric" || mode === "rev-numeric") {
-    items.sort((a, b) => {
-      const aNum = parseFloat(a.querySelector('.total')?.textContent.split(":")[1].trim()) || 0;
-      const bNum = parseFloat(b.querySelector('.total')?.textContent.split(":")[1].trim()) || 0;
-      return mode === "numeric" ? (aNum - bNum) : (bNum - aNum);
-    });
-  }
-
-  items.forEach(item => ulElement.appendChild(item));
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-	
-	document.getElementById('shuffle').addEventListener("click", () => {
-		sortList(document.getElementById('listContainer'), "random");
-	});
-	document.getElementById('sortSelect').addEventListener("change", () => {
-		const value=document.getElementById('sortSelect').value;
-		if(value==="random"){
-			document.getElementById('shuffle').style.display = 'inline-block';
-		}else{
-			document.getElementById('shuffle').style.display = 'none';
-			
+	if (mode === "random") {
+		for (let i = items.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[items[i], items[j]] = [items[j], items[i]];
 		}
-		sortList(document.getElementById('listContainer'), value);
-	});
-	// Function to add list items to #listContainer
-	function addListItem(name, total, max, min) {
-		const listItem = document.createElement("li");
-		listItem.innerHTML = `
-	<stat title="Go to Full Leaderboard of '${name.replaceAll("_"," ").replaceAll("."," ")}'" onclick="if(event.target.closest('a')) return; window.open('stat/${name}.html','_blank');" >
-	<strong class=stathead >${name}</strong>
-	<div class="total"><div>
-	
-		Total: ${total}
-	</div></div>
-	<div class="players">
-		<div class="minimax max">
-			<span>Max: ${max.amount}</span>
-			<div class=inline>
-				${max.players.map(player => `<span class="player"><a class='profile_link' href='player/${player}.html' target="_blank"><img class='inline_face' src='faces/${player}.png'>${player}</a></span>`).join(", ")}
-			</div> 
-		</div>
-		<hr/>
-		<div class="minimax min">
-			<span>Min: ${min.amount}</span>
-			<div  class=inline>
-			${min.players.map(player => `<span class="player"><a class='profile_link' href='player/${player}.html' target="_blank"><img class='inline_face' src='faces/${player}.png'>${player}</a></span>`).join(", ")}
-			</div> 
-		</div> 
-	</div>
-	</stat>
-	`;
-		listContainer.appendChild(listItem);
-		return(listItem)
-	}
-
-	const filterInput = document.getElementById("searchInput");
-	const listContainer = document.getElementById("listContainer");
-
-	// Function to filter the list items based on the input value
-	let searchID = 0
-	async function filterListItemsAsync() {
-		// Clear the previous timeout if there was one
-		searchID++
-		let myID = searchID
-		const statfilter = document.getElementById("filterStat").checked;
-		const maxfilter = document.getElementById("filterMax").checked;
-		const minfilter = document.getElementById("filterMin").checked;
-		//console.log(statfilter, maxfilter, minfilter)
-		// Wrap the function logic in a Promise to handle asynchronous operations
-		// Set a new timeout to wait for a brief moment of inactivity in input events
-
-		const filterValue = filterInput.value.toLowerCase().replaceAll("_", " ").replaceAll(".", " ");
-		const listItems = listContainer.getElementsByTagName("li");
-		const markedItems = listContainer.getElementsByClassName("match");
-		//console.log(filterValue)
-	
-		let counter = 0;
-		await new Promise(resolve => setTimeout(resolve, 1));//let the ui update
-		for (const markedItem of markedItems) {
-			counter++
-			if (counter % 100 == 0) {
-				await new Promise(resolve => setTimeout(resolve, 1));
-				counter=0
-			}
-			if (myID != searchID) {
-				break
-			}
-			markedItem.classList.remove("match");
-			
-		}
-		await new Promise(resolve => setTimeout(resolve, 1));//let the ui update
-		for (const listItem of listItems) {
-			counter++
-			if (counter % 100 == 0) {
-				await new Promise(resolve => setTimeout(resolve, 1));
-				counter=0
-			}
-			if (myID != searchID) {
-				break
-			}
-			
-			if (filterValue === "") {
-				foundMatch = listItem.style.display="block";
-				
-			} else {
-				foundMatch = listItem.style.display="none";
-			}
-			
-		}
-		
-		await new Promise(resolve => setTimeout(resolve, 1));//let the ui update
-		if(statfilter){
-			for (const name in searchIndex.statName) {
-				counter++
-				if (counter % 100 == 0) {
-					await new Promise(resolve => setTimeout(resolve, 1));
-					counter=0
-				}
-				if (myID != searchID) {
-					break
-				}
-				if(name.includes(filterValue)){
-					searchIndex.statName[name].style.display="block";
-					if(filterValue!=""){
-						searchIndex.statName[name].getElementsByClassName("stathead")[0].classList.add("match");
-					}
-				}
-			}
-		}
-		await new Promise(resolve => setTimeout(resolve, 1));//let the ui update
-		if(maxfilter || minfilter){
-			for (const name in searchIndex.players) {
-				counter++
-				if (counter % 100 == 0) {
-					await new Promise(resolve => setTimeout(resolve, 1));
-					counter=0
-				}
-				if (myID != searchID) {
-					break
-				}
-				if(name.includes(filterValue)){
-					if(maxfilter){
-						for(const li of searchIndex.players[name].max){
-							li.style.display="block";
-
-							const matched = li.querySelectorAll("div.minimax.max .player");
-
-							matched.forEach(el => {
-									
-								if(el.textContent.toLowerCase().includes(filterValue)){
-									el.classList.add("match")
-								}
-							});
-						
-						}
-						
-					}
-					if(minfilter){
-						for(const li of searchIndex.players[name].min){
-							li.style.display="block";
-							
-								const matched = li.querySelectorAll("div.minimax.min .player");
-								matched.forEach(el => {
-									if(el.textContent.toLowerCase().includes(filterValue)){
-										el.classList.add("match")
-									}
-								});
-							
-						}
-						
-					}
-				}
-			}
-		}
-	}
-
-	const cacheKey = $(location).prop("href").split("/").slice(-4,-2).join("/")+"/leaderboard.json";
-	localStorage.removeItem('cachedJSONData');
-	async function loadJSONData() {
-		var dataversion = 0
-		try {
-			const response = await fetch('dataversion'); // Replace with the actual relative path
-			dataversion = await response.text();
-			//console.log("dataversion: ",dataversion);
-		} catch (error) {
-			console.error('Error fetching dataversion file:', error);
-			throw new error(error)
-		}
-
-		return new Promise((resolve, reject) => {
-			// Check if the JSON data is already cached
-			const cachedData = localStorage.getItem(cacheKey);
-
-			const existingDataversion = getCookie('dataversion');
-			//console.log("existingDataversion: ",existingDataversion);
-			//console.log("dataversion: ",dataversion);
-			if (existingDataversion && existingDataversion === dataversion && cachedData) {
-				// If data is cached, parse and resolve the promise
-				const jsonData = JSON.parse(cachedData);
-				resolve(jsonData);
-			} else {
-				// If data is not cached, make a fetch request and cache the data
-				fetch("leaderboard.json")
-					.then(response => response.json())
-					.then(data => {
-						try{
-							// Cache the data in localStorage
-							localStorage.setItem(cacheKey, JSON.stringify(data));
-						}catch(error){
-							console.error(error)
-							console.error("Clearing cache and retrying")
-							localStorage.clear()
-							localStorage.setItem(cacheKey, JSON.stringify(data));
-						}
-						resolve(data);
-						setCookie('dataversion', dataversion);
-					})
-					.catch(error => reject(error));
-			}
+	} else if (mode === "alpha" || mode === "rev-alpha") {
+		items.sort((a, b) => {
+			const cmp = a._search.stat.localeCompare(b._search.stat, undefined, { sensitivity: 'base' });
+			return mode === "alpha" ? cmp : -cmp;
+		});
+	} else if (mode === "numeric" || mode === "rev-numeric") {
+		items.sort((a, b) => {
+			return mode === "numeric" ? (a._total - b._total) : (b._total - a._total);
 		});
 	}
 
-	// Load the JSON data and add list items asynchronously
-	async function processJSON(data) {
-		let counter=0;
-		for (const entry of data) {
-			//counter++
-			//if (counter % 100 == 0) {
-			//	await new Promise(resolve => setTimeout(resolve, 0));
-			//	counter=0
-			//}
-			counter++
-			if (counter % 100 == 0) {
-				await new Promise(resolve => setTimeout(resolve, 1));
-				counter=0
-			}
-			if(entry.name=='minecraft.crafted.air'){
-				continue
-			}
-			const item=addListItem(entry.name, entry.total, entry.max, entry.min);
-			
-			searchIndex.statName[entry.name.replaceAll("_", " ").replaceAll(".", " ")]=item
-			//console.log(entry)
-			for(const raw of entry.max.players){
-				
-				const name=raw.toLowerCase().replaceAll("_", " ").replaceAll(".", " ")
-				if(! (name in searchIndex.players)){
-						searchIndex.players[name]={"max":[],"min":[]};
+	items.forEach(item => ulElement.appendChild(item));
+}
+
+function match(filterValue, statfilter, maxfilter, minfilter,li){
+	const data = li._search;
+
+		
+
+		if (statfilter && data.stat.includes(filterValue)) {
+			return true;
+		}
+
+		if (maxfilter) {
+			for (const p of data.max) {
+				if (p.includes(filterValue)) {
+					return  true;
+					
 				}
-				//console.log(name,searchIndex.players[name])
-				searchIndex.players[name].max.push(item)
-			}
-			for(const raw of entry.min.players){
-				const name=raw.toLowerCase().replaceAll("_", " ").replaceAll(".", " ")
-				if(! (name in searchIndex.players)){
-						searchIndex.players[name]={"max":[],"min":[]};
-				}
-				searchIndex.players[name].min.push(item)
 			}
 		}
-	}
-	loadJSONData()
-		.then(data => {
-			processJSON(data);
 
-		})
-		.catch(error => console.error("Error loading JSON data:", error));
-	filterInput.addEventListener("input", async () => {
-		await filterListItemsAsync();
+		if (minfilter) {
+			for (const p of data.min) {
+				if (p.includes(filterValue)) {
+					return true;
+		
+				}
+			}
+		}
+		return false
+		
+}
+function computeMatches(filterValue, statfilter, maxfilter, minfilter, listContainer) {
+	const matches = new Set();
+
+	for (const li of listContainer.children) {
+		if (filterValue){
+			if( match(filterValue, statfilter, maxfilter, minfilter,li)){
+				matches.add(li);
+			}
+		}else{
+			matches.add(li);
+		}
+	}
+
+	return matches;
+}
+
+function applyVisibility(matches) {
+	requestAnimationFrame(() => {
+		for (const el of visibleItems) {
+			if (!matches.has(el)) el.classList.add("hidden");
+		}
+		for (const el of matches) {
+			if (!visibleItems.has(el)) el.classList.remove("hidden");
+		}
+		visibleItems = matches;
 	});
-	document.getElementById('filterMax').addEventListener("input", async () => {
-		await filterListItemsAsync();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+	const filterInput = document.getElementById("searchInput");
+	const listContainer = document.getElementById("listContainer");
+
+	document.getElementById('shuffle').addEventListener("click", () => {
+		sortList(listContainer, "random");
 	});
-	document.getElementById('filterStat').addEventListener("input", async () => {
-		await filterListItemsAsync();
+
+	document.getElementById('sortSelect').addEventListener("change", () => {
+		const value = document.getElementById('sortSelect').value;
+
+		document.getElementById('shuffle').style.display =
+			value === "random" ? 'inline-block' : 'none';
+
+		sortList(listContainer, value);
 	});
-	document.getElementById('filterMin').addEventListener("input", async () => {
-		await filterListItemsAsync();
+
+	function addListItem(name, total, max, min,frag,  [q, statFilter, maxFilter, minFilter]) {
+		const listItem = document.createElement("li");
+		const string=`
+<stat title="Go to Full Leaderboard of '${name.replaceAll("_"," ").replaceAll("."," ")}'" onclick="if(event.target.closest('a')) return; window.open('stat/${encodeURIComponent(name)}.html','_blank');">
+<strong class=stathead>${name}</strong>
+<div class="total"><div>Total: ${total}</div></div>
+<div class="players">
+	<div class="minimax max">
+		<span>Max: ${max.amount}</span>
+		<div class=inline>
+			${max.players.map(player => `<span class="player"><a class='profile_link' href='player/${player}.html' target="_blank"><img class='inline_face' src='faces/${player}.png'>${player}</a></span>`).join(", ")}
+		</div> 
+	</div>
+	<hr/>
+	<div class="minimax min">
+		<span>Min: ${min.amount}</span>
+		<div class=inline>
+			${min.players.map(player => `<span class="player"><a class='profile_link' href='player/${player}.html' target="_blank"><img class='inline_face' src='faces/${player}.png'>${player}</a></span>`).join(", ")}
+		</div> 
+	</div> 
+</div>
+</stat>
+`;
+		listItem.innerHTML = string
+
+		listItem._search = {
+			stat: name.toLowerCase().replaceAll("_", " ").replaceAll(".", " "),
+			max: max.players.map(p => p.toLowerCase().replaceAll("_", " ").replaceAll(".", " ")),
+			min: min.players.map(p => p.toLowerCase().replaceAll("_", " ").replaceAll(".", " "))
+		};
+
+		listItem._total = total;
+		if (q){
+			if(!match(q, statFilter, maxFilter, minFilter,listItem)){
+				listItem.classList.add("hidden");
+			}
+		}
+		frag.appendChild(listItem);
+		return listItem;
+	}
+
+	function updateURL(query) {
+		const url = new URL(window.location);
+		if (query) {
+			url.searchParams.set("q", query);
+		} else {
+			url.searchParams.delete("q");
+		}
+		history.replaceState(null, "", url);
+	}
+
+	let debounceTimer;
+
+	function runFilter() {
+		const value = filterInput.value.toLowerCase().replaceAll("_", " ").replaceAll(".", " ");
+
+		const matches = computeMatches(
+			value,
+			document.getElementById("filterStat").checked,
+			document.getElementById("filterMax").checked,
+			document.getElementById("filterMin").checked,
+			listContainer
+		);
+
+		applyVisibility(matches);
+		updateURL(value);
+	}
+
+	filterInput.addEventListener("input", () => {
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(runFilter, 100);
 	});
-	
+
+	document.getElementById('filterMax').addEventListener("input", runFilter);
+	document.getElementById('filterStat').addEventListener("input", runFilter);
+	document.getElementById('filterMin').addEventListener("input", runFilter);
+
+	async function loadJSONData() {
+		const response = await fetch("leaderboard.json");
+		return await response.json();
+	}
+
+	async function processJSON(data) {
+		let counter = 0;
+		
+		let frag = document.createDocumentFragment();
+		const params = new URLSearchParams(window.location.search);
+		const q = params.get("q");
+		if (q) {
+			filterInput.value = q.toLowerCase().replaceAll("_", " ").replaceAll(".", " ");	
+		}
+		const statFilter=document.getElementById("filterStat").checked;
+		const maxFilter=document.getElementById("filterMax").checked;
+		const minFilter=document.getElementById("filterMin").checked;
+		for (const entry of data) {
+
+			counter++;
+			if (counter % 100 === 0) {
+				listContainer.appendChild(frag);
+				if (typeof scheduler !== "undefined" && typeof scheduler.yield === "function") {
+					await scheduler.yield.bind(scheduler);
+				}else{
+					await  new Promise(r => setTimeout(r, 0));
+				}
+				frag = document.createDocumentFragment();
+			}
+
+			if (entry.name === 'minecraft.crafted.air') continue;
+
+			const item = addListItem(entry.name, entry.total, entry.max, entry.min, frag , [q, statFilter, maxFilter, minFilter]);
+
+			searchIndex.statName[item._search.stat] = item;
+
+			for (const raw of entry.max.players) {
+				const name = raw.toLowerCase().replaceAll("_", " ").replaceAll(".", " ");
+				let player = searchIndex.players[name];
+				if (!player) {
+					player = { max: [], min: [] };
+					searchIndex.players[name] = player
+				}
+				player.max.push(item);
+			}
+
+			for (const raw of entry.min.players) {
+				const name = raw.toLowerCase().replaceAll("_", " ").replaceAll(".", " ");
+				let player = searchIndex.players[name];
+				if (!player) {
+					player = { max: [], min: [] };
+					searchIndex.players[name] = player;
+				}
+				player.min.push(item);
+			}
+		}
+		listContainer.appendChild(frag);
+		// initial full visibility
+		const all = new Set(listContainer.children);
+		applyVisibility(all);
+		// apply query from URL if present
+		
+		runFilter();
+	}
+
+	loadJSONData()
+		.then(processJSON)
+		.catch(err => console.error(err));
 });
 
 function topFunction() {
-	document.body.scrollTop = 0; // For Safari
-	document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-}
-// Function to get the value of a cookie
-function getCookie(cookieName) {
-	const cookies = document.cookie.split('; ');
-	for (const cookie of cookies) {
-		const [name, value] = cookie.split('=');
-		if (name === cookieName) {
-			return value;
-		}
-	}
-	return null;
+	document.body.scrollTop = 0;
+	document.documentElement.scrollTop = 0;
 }
 
-// Function to set the value of a cookie
-function setCookie(cookieName, value) {
-	document.cookie = `${cookieName}=${value}`;
-	
-}
-
-const initialDarkCookie=localStorage.getItem('darkmode')
-if(initialDarkCookie=='sane'){
-		activateLightMode();
-		document.getElementById('saneMode').checked=true;
-	}else if(initialDarkCookie=='dark'){
-		activateDarkMode();
-		document.getElementById('darkMode').checked=true;
-	}else if(initialDarkCookie=='amoled'){
-		activateAmoledMode();
-		document.getElementById('amoledMode').checked=true;
-	}
-function activateLightMode(){
-	const rootElement = document.documentElement;
-	rootElement.removeAttribute('class');
-	localStorage.setItem('darkmode','sane');
-}
-
-function activateDarkMode(){
-	const rootElement = document.documentElement;
-	rootElement.removeAttribute('class');
-	rootElement.classList.add('darkmode');
-	localStorage.setItem('darkmode','dark')
-}
-
-function activateAmoledMode(){
-		const rootElement = document.documentElement;
-	rootElement.removeAttribute('class');
-	rootElement.classList.add('amoledmode');
-	localStorage.setItem('darkmode','amoled')
-}

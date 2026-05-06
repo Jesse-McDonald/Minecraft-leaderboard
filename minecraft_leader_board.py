@@ -9,6 +9,7 @@ import shutil
 import json
 from collections import defaultdict
 from pathlib import Path
+import urllib.parse
 
 
 verbosity_level=None
@@ -108,13 +109,15 @@ class Output:
 		self.tar_file = None
 	
 		if "zip" in compression:
+			import zipfile
 			self.base_path.mkdir(parents=True, exist_ok=True)
-			self.archive_path = self.base_path / name+".zip"
+			self.archive_path = self.base_path / (name+".zip")
 			self.zip_file = zipfile.ZipFile(self.archive_path, "w", zipfile.ZIP_DEFLATED)
 			self.compression="zip"
 		elif "t" in compression:
+			import tarfile
 			self.base_path.mkdir(parents=True, exist_ok=True)
-			self.archive_path = self.base_path / name+".tar.gz"
+			self.archive_path = self.base_path / (name+".tar.gz")
 			self.tar_file = tarfile.open(self.archive_path, "w:gz")
 			self.compression="tar"
 		else:
@@ -133,7 +136,7 @@ class Output:
 		if isinstance(data, str):
 			data = data.encode("utf-8")
 
-		relative_path = str(relative_path).lstrip("/")
+		relative_path = Path(relative_path).as_posix().lstrip("/")
 
 		if self.compression == "none":
 			full_path = self.base_path / relative_path
@@ -149,18 +152,17 @@ class Output:
 	
 			info = tarfile.TarInfo(name=relative_path)
 			info.size = len(data)
-			self.tar_file.addfile(info, BytesIO(data))
+			self.tar_file.addfile(info, io.BytesIO(data))
 			
 	def copy_path(self, src_path, dest_path=None):
-		"""
-		Copy a file from disk into the output using the write() abstraction.
-		"""
 		src_path = Path(src_path)
 
 		if dest_path is None:
 			dest_path = src_path.name
 		else:
-			dest_path = str(dest_path).lstrip("/")
+			dest_path = str(dest_path)
+
+		dest_path = Path(dest_path).as_posix().lstrip("/")
 
 		self.write(dest_path, src_path.read_bytes())
 			
@@ -181,24 +183,27 @@ class Output:
 ## Main functions
 def init_players(rootpath,uuids, doFaces):
 	ret={}
-	for name in os.listdir(rootpath):
-		path = os.path.join(rootpath, name)
+	for filename in os.listdir(rootpath):
+		path = os.path.join(rootpath, filename)
 		if os.path.isfile(path):
 			print(path)
-			if(".json" in name):
-				uuid=name[0:name.find('.')]
-				if uuid in uuids and (not doFaces or os.path.exists("cache/faces/"+name+".png")):
+			if(".json" in filename):
+				source=""
+				uuid=filename[0:filename.find('.')]
+				if uuid in uuids and (not doFaces or os.path.exists("cache/faces/"+uuids[uuid]+".png")):
 					name=uuids[uuid]
+					source="cached"
 				else:
 					name, face = uuid_api_official(uuid,doFaces)
 					if face:
 						face.save("cache/faces/"+name+".png")
+					source="fetched"	
 				if name is None or len(name)<2:
 					continue
 				if verbosity_level > 0: 
-					print(uuid+": "+name) 
+					print(uuid+": "+name+" - "+source) 
 				uuids[uuid]=name
-				save_json("cache/uuid.json",uuids)
+				save_json("cache/uuid.json",uuids, )
 				ret[uuid]={"name":name}
 	return ret
 				
@@ -237,7 +242,6 @@ def apply_mapping(mapping,players):
 				
 def generate_custom(custom,players):
 	for key in custom:
-		print(key)
 		for player in players.values():
 			sum=0
 			count=0
@@ -246,8 +250,8 @@ def generate_custom(custom,players):
 			for target in custom[key]["stats"]:
 				if target in player["stats"]:
 					if count ==0:
-						max=player["stats"][target]
-						min=player["stats"][target]
+						maxV=player["stats"][target]
+						minV=player["stats"][target]
 					else:
 						maxV=max(maxV,player["stats"][target])
 						minV=min(minV,player["stats"][target])
@@ -264,6 +268,7 @@ def generate_custom(custom,players):
 				customstat=minV
 			elif custom[key]["op"]=="max":
 				customstat=maxV		
+			
 			if customstat!=0:
 				player["stats"][key]=customstat 
 def fullStats(players):
@@ -272,9 +277,98 @@ def fullStats(players):
 		for stat in player["stats"]:
 			stats[stat].append({"name":player["name"],"amount":player["stats"][stat]})
 	for stat in stats.values():
-		stat.sort(key=lambda x: x["amount"])
+		stat.sort(reverse=True, key=lambda x: x["amount"])
 		
 	return stats
+
+class Converter():
+	def __init__(self,table):
+		self.table=table
+		
+	def __call__(self, stat, amount):
+		if stat in self.table:
+			rule=self.table[stat]
+			if rule["type"]=="item":
+				stack=rule["stackSize"]
+				working=amount
+				unit=""
+				if working>(256*256*128):
+					working/=(256*256*128)
+					unit="TCSU"
+				else:	
+					if working>stack and stack > 1 and unit=="":
+						unit="S"
+						working/=stack
+					if working>27 and unit=="S":
+						unit="SB"
+						working/=27
+					if working>54 and unit=="SB":
+						unit="DC"
+						working/=54
+				return str(round(working,1))+" "+unit
+			elif rule["type"]=="time":
+				seconds=rule["seconds"]
+				working=amount*seconds
+				unit="s"
+				if working>60 and unit=="s":
+					unit="m"
+					working/=60
+				if working>60 and unit=="m":	
+					unit="H"
+					working/=60	
+				if working>24 and unit=="H":	
+					unit="D"
+					working/=24
+				if working>365 and unit=="D":
+					unit="Y"
+					working/=365
+				elif working>30 and unit=="D":	
+					unit="M"
+					working/=30
+				elif working>7 and unit=="D":
+					unit="W"
+					working/=7
+				return str(round(working,1))+" "+unit
+					
+			elif rule["type"]=="distance":
+				meter=rule["meter"]
+				working=amount*meter
+				unit=""
+				maxed=""
+				if amount==2**31-1:
+					maxed=" (maxed)"
+				if working>1000 and unit=="":
+					unit="k"
+					working/=1000
+				if working>1000 and unit=="k":
+					unit="M"
+					working/=1000
+				if working>1000 and unit=="M":
+					unit="G"
+					working/=1000
+				if working>1000 and unit=="G":
+					unit="T"
+					working/=1000
+				return str(round(working,1))+" "+unit+"m"+maxed
+
+		working=amount
+		unit=""
+		maxed=""
+		if amount==2**31-1:
+			maxed=" (maxed)"
+		if working>1000 and unit=="":
+			unit="k"
+			working/=1000
+		if working>1000 and unit=="k":
+			unit="M"
+			working/=1000
+		if working>1000 and unit=="M":
+			unit="B"
+			working/=1000
+		if working>1000 and unit=="B":
+			unit="T"
+			working/=1000		
+		return str(round(working,1))+" "+unit+maxed
 ## Driver
 
 def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compression=None, html_title="Leaderboard", legacy_mode="auto", output=None, verbosity=1):
@@ -303,10 +397,9 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 		
 	verbosity_level=verbosity
 	
-	try:
-		custom_stats=load_json("custom.json")
-	except:
-		custom_stats={}
+	convert=Converter(load_json("conversions.json"))
+	custom_stats=load_json("custom.json")
+
 	
 		
 	if clean: 
@@ -319,37 +412,56 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 		uuids=load_json("cache/uuid.json")
 	except:
 		uuids={}
-	
+	if  verbosity > 0:
+		print("Loading players...")
 	players=init_players(input_dir, uuids, web)
 	for uuid in players:
 		if legacy_mode == "true":
 			extract_legacy(input_dir,uuid,players)
 		else:
 			extract(input_dir,uuid,players)
-	try:
-		mapping=load_json("mappings.json")
-	except:
-		mapping={}
-		
+	conversions=load_json("conversions.json")
+	mapping=load_json("mappings.json")
+	
+	if  verbosity > 0:
+		print("Applying Custom Mappings...")	
 	apply_mapping(mapping, players)
+	
+	if  verbosity > 0:
+		print("Calculating Custom Stats...")
 	generate_custom(custom_stats, players)
 	
+	if  verbosity > 0:
+		print("Generating Leader board...")
 	stats = fullStats(players)
+	
 	totals = {}
 	statsindexed=defaultdict(dict)
+	
+	if  verbosity > 0:
+		print("Indexing...")
 	for stat in stats:
-		stats[stat].sort(key=lambda x: x["amount"])
+		stats[stat].sort(reverse=True, key=lambda x: x["amount"])
 		for i,v in enumerate(stats[stat]):
 			v["rank"]=i+1
 			statsindexed[stat][v["name"]]=v	
+	
+	if  verbosity > 0:
+		print("Calculating Totals...")		
 	for stat in stats:
 		totals[stat]=sum(x["amount"] for x in stats[stat])
+	
+	if  verbosity > 0:
+		print("Clearing the Air...")	
 	for stat in list(totals.keys()):
 		if totals[stat]==0:
 			del stats[stat]
+	
+	if  verbosity > 0:
+		print("Silently Judging...")
 	for player in players.values():
 		pstats=[]
-		for stat in stats:
+		for stat in player["stats"]:
 			if totals[stat]==0:
 				continue
 			pstat={
@@ -357,26 +469,34 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 				"rank":statsindexed[stat][player["name"]]["rank"] ,
 				"stat":stat,
 			}
-			pstat["imp_rating"] = totals[stat] / pstat["amount"] * len(stats[stat]) - statsindexed[stat][player["name"]]["rank"]
+			pstat["imp_rating"] = pstat["amount"] / totals[stat] * len(stats[stat]) - statsindexed[stat][player["name"]]["rank"]
 			#percentage completed * competition - rank
 			pstats.append(pstat)
-		player["stats"]=sorted(pstats, key=lambda x: x["imp_rating"])
-		for i, stat in enumerate(pstats):
+		player["stats"]=sorted(pstats, reverse=True, key=lambda x: x["imp_rating"])
+		for i, stat in enumerate(player["stats"]):
 			stat["imp_rank"]=i+1
 
+	if  verbosity > 0:
+		print("Loudly Judging...")
 	leaderboard=[]
 	for stat in stats:
 		min_val=min(item["amount"] for item in stats[stat])
 		max_val=max(item["amount"] for item in stats[stat])
+		max_val_conv=convert(stat,max_val)
+		min_val_conv=convert(stat,min_val)
 		leaderboard.append({
 				"name":stat,
-				"total":totals[stat],
-				"max":{"amount":max_val,"players":[item for item in stats[stat] if item["amount"] == max_val]},
-				"min":{"amount":min_val,"players":[item for item in stats[stat] if item["amount"] == min_val]}
+				"total":convert(stat,totals[stat]),
+				"max":{"amount":max_val_conv,"players":[item["name"] for item in stats[stat] if item["amount"] == max_val]},
+				"min":{"amount":min_val_conv,"players":[item["name"] for item in stats[stat] if item["amount"] == min_val]}
 			})
-	
+	if  verbosity > 0:
+		print("Exporting:")
 	mkdir(output)
+	
 	if web:
+		if  verbosity > 0:
+			print("\tWeb:")
 		stat_template=load_file("webtemplate/stat.html")
 		stat_line_template=load_file("webtemplate/stat_line.html")
 		stat_summary_template=load_file("webtemplate/stat_summary_line.html")
@@ -384,7 +504,10 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 		player_line_template=load_file("webtemplate/player_line.html")
 		player_summary_template=load_file("webtemplate/player_summary_line.html")
 		mainpage=load_file("webtemplate/index.html")
+
 		with Output(output, "web", compression) as webout:
+			if  verbosity > 0:
+				print("\t\tplayers...")
 			for player in players.values():
 				webout.copy_path("cache/faces/"+player["name"]+".png","faces/"+player["name"]+".png")
 				
@@ -393,11 +516,13 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 					pstat=(
 						player_line_template
 						.replace("{{Stat Name}}",stat["stat"])
+						.replace("{{Stat Name safe}}",urllib.parse.quote(stat["stat"]))
 						.replace("{{Stat rank}}",str(stat["rank"]))
 						.replace("{{Stat impv}}",str(stat["imp_rating"]))
 						.replace("{{Stat impr}}",str(stat["imp_rank"]))
 						.replace("{{Stat amount}}",str(stat["amount"]))
-						.replace("{{Stat percent}}",str(round(totals[stat["stat"]]/stat["amount"]*100)))
+						.replace("{{Stat conv}}",str(convert(stat["stat"],stat["amount"])))
+						.replace("{{Stat percent}}",str(round(stat["amount"]/totals[stat["stat"]]*100)))
 					)
 					htmlstats+=pstat
 				htmlsummary=""
@@ -409,18 +534,20 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 						.replace("{{Stat impv}}",str(stat["imp_rating"]))
 						.replace("{{Stat impr}}",str(stat["imp_rank"]))
 						.replace("{{amount}}",str(stat["amount"]))
-						.replace("{{Stat percent}}",str(round(totals[stat["stat"]]/stat["amount"]*100)))
+						.replace("{{Stat percent}}",str(round(stat["amount"]/totals[stat["stat"]]*100)))
 					)
 					htmlsummary+=pstat
 				htmlout=(
 					player_template
 					.replace("{{name}}",player["name"])
 					.replace("{{stat line}}",htmlstats)
-					.replace("{{summary line}}",htmlsummary)
+					.replace("{{stat summary line}}",htmlsummary)
 					.replace("{{html title}}",html_title)
 				)
 					
 				webout.write("player/"+player["name"]+".html",htmlout)
+			if  verbosity > 0:
+				print("\t\tstats...")	
 			for stat in stats:
 				htmlstats=""
 				for player in stats[stat]:
@@ -430,30 +557,35 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 						.replace("{{stat rank}}",str(statsindexed[stat][player["name"]]["rank"]))
 						.replace("{{player name}}",player["name"])
 						.replace("{{raw}}",str(player["amount"]))
-						.replace("{{percentage rounded}}",str(round(totals[stat]/player["amount"]*100)))
-						.replace("{{percentage}}",str(totals[stat]/player["amount"]*100))
+						.replace("{{amount conv}}",str(convert(stat,statsindexed[stat][player["name"]]["amount"])))
+						.replace("{{percentage rounded}}",str(round(player["amount"]/totals[stat]*100)))
+						.replace("{{percentage}}",str(player["amount"]/totals[stat]*100))
 					)
 					htmlstats+=pstat
 				htmlsummary=""
 				for player in stats[stat][:10]:
 					pstat=(
-						stat_line_template
-						.replace("{{player Name}}",player["name"])
+						stat_summary_template
+						.replace("{{player name}}",player["name"])
 						.replace("{{rank}}",str(statsindexed[stat][player["name"]]["rank"]))
 						.replace("{{amount}}",str(statsindexed[stat][player["name"]]["amount"]))
-						.replace("{{percentage rounded}}",str(round(totals[stat]/statsindexed[stat][player["name"]]["rank"]*100)))
-						.replace("{{percentage}}",str(totals[stat]/statsindexed[stat][player["name"]]["rank"]*100))
+						.replace("{{percentage rounded}}",str(round(statsindexed[stat][player["name"]]["amount"]/totals[stat]*100)))
+						.replace("{{percentage}}",str(statsindexed[stat][player["name"]]["amount"]/totals[stat]*100))
 					)
 					htmlsummary+=pstat	
 				htmlout=(
 					stat_template
+					.replace("{{stat summary line}}",htmlsummary)
 					.replace("{{stat Name}}",stat)
-					.replace("{{total}}",str(totals[stat]))
+					.replace("{{total}}",str(convert(stat,totals[stat])))
+					.replace("{{raw total}}",str(totals[stat]))
 					.replace("{{stat list}}",htmlstats)
 					.replace("{{html title}}",html_title)
 				)
 				webout.write("stat/"+stat+".html",htmlout)
-				
+			if  verbosity > 0:
+				print("\t\tstatic...")
+					
 			htmlout=(mainpage
 				.replace("{{Title}}",html_title)
 			)
@@ -463,15 +595,22 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 				for file in filenames:
 					webout.copy_path(dirpath+"/"+file)
 	if jsonA:
+		if  verbosity > 0:
+				print("\twJSON:")
 		with Output(output, "api", compression)	as apiout: 
 			pass
-		
+
 	if text:
+		if  verbosity > 0:
+			print("\twtext:")
+
 		with Output(output, "text", compression) as textout: 
 			pass
 	if clean: 
 		rmdir("cache") 
-	
+	if  verbosity > 0:
+		print("Done:")
+
 def parse_args():
 	parser = argparse.ArgumentParser()
 

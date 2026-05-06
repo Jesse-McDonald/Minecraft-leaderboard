@@ -31,7 +31,7 @@ $(document).ready(function () {
 	  span.style.cursor = "pointer";
 	  span.addEventListener("click", () => {
 		const rows = Array.from(table.querySelectorAll("li:not(.header)"));
-
+		
 		// Determine sort order
 		if (lastSortedIndex === index) {
 		  // Flip order if same column clicked
@@ -43,12 +43,12 @@ $(document).ready(function () {
 		lastSortedIndex = index;
 
 		rows.sort((a, b) => {
-		  let aText = a.children[index].textContent.trim();
-		  let bText = b.children[index].textContent.trim();
+		  let aText = a.children[index].dataset.raw;
+		  let bText = b.children[index].dataset.raw;
 
 		  // Numeric sorting if possible
-		  const aNum = parseFloat(aText);
-		  const bNum = parseFloat(bText);
+		  const aNum = parseFloat(aText.replace("#",""));
+		  const bNum = parseFloat(bText.replace("#",""));
 		  if (!isNaN(aNum) && !isNaN(bNum)) {
 			aText = aNum;
 			bText = bNum;
@@ -68,51 +68,3 @@ $(document).ready(function () {
 
 	});
 });
-
-// Function to get the value of a cookie
-function getCookie(cookieName) {
-	const cookies = document.cookie.split('; ');
-	for (const cookie of cookies) {
-		const [name, value] = cookie.split('=');
-		if (name === cookieName) {
-			return value;
-		}
-	}
-	return null;
-}
-
-function setCookie(cookieName, value) {
-	document.cookie = `${cookieName}=${value}`;
-	
-}
-
-const initialDarkCookie=localStorage.getItem('darkmode')
-if(initialDarkCookie=='sane'){
-		activateLightMode();
-		document.getElementById('saneMode').checked=true;
-	}else if(initialDarkCookie=='dark'){
-		activateDarkMode();
-		document.getElementById('darkMode').checked=true;
-	}else if(initialDarkCookie=='amoled'){
-		activateAmoledMode();
-		document.getElementById('amoledMode').checked=true;
-	}
-function activateLightMode(){
-	const rootElement = document.documentElement;
-	rootElement.removeAttribute('class');
-	localStorage.setItem('darkmode','sane');
-}
-
-function activateDarkMode(){
-	const rootElement = document.documentElement;
-	rootElement.removeAttribute('class');
-	rootElement.classList.add('darkmode');
-	localStorage.setItem('darkmode','dark')
-}
-
-function activateAmoledMode(){
-		const rootElement = document.documentElement;
-	rootElement.removeAttribute('class');
-	rootElement.classList.add('amoledmode');
-	localStorage.setItem('darkmode','amoled')
-}

@@ -2,7 +2,9 @@ body {
 	font-family: Arial, sans-serif;
 	padding: 20px;
 }
-
+.hidden {
+	display: none;
+}
 
 .filterRow{
 	display:inline-block;
