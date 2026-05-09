@@ -1,4 +1,4 @@
-.united-number, .raw-number{
+.united-number, .raw-number, .darkmode .united-number, .darkmode  .raw-number, .amoledmode .united-number , .amoledmode  .raw-number{
 	border:none;
 	display:inline;
 	height: auto;

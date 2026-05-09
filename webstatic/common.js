@@ -51,7 +51,7 @@ function activateAmoledMode(){
 
 
 const initialUnitCookie=localStorage.getItem('raworunit')
-document.getElementById("unitselector").checked=initialUnitCookie
+document.getElementById("unitselector").checked=initialUnitCookie=="true"
 toggleUnits()
 function toggleUnits(){
 	const rootElement = document.documentElement;

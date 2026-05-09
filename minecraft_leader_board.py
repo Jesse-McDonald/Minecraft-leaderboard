@@ -38,9 +38,7 @@ def save_json(path, data):
 		
 
 def flatten_dict(d, parent_key="", sep="."):
-	"""
-	Flatten a nested dictionary using a separator for keys.
-	"""
+
 	items = {}
 
 	for k, v in d.items():
@@ -126,12 +124,6 @@ class Output:
 			self.compression="none"
 
 	def write(self, relative_path, data):
-		"""
-		Write a file to the output target.
-
-		relative_path: str or Path inside archive/directory
-		data: str or bytes
-		"""
 
 		if isinstance(data, str):
 			data = data.encode("utf-8")
@@ -461,9 +453,13 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 		print("Silently Judging...")
 	for player in players.values():
 		pstats=[]
+		count=0
+		ranks=0
+		weighted=0
 		for stat in player["stats"]:
 			if totals[stat]==0:
 				continue
+
 			pstat={
 				"amount":player["stats"][stat],
 				"rank":statsindexed[stat][player["name"]]["rank"] ,
@@ -472,10 +468,18 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 			pstat["imp_rating"] = pstat["amount"] / totals[stat] * len(stats[stat]) - statsindexed[stat][player["name"]]["rank"]
 			#percentage completed * competition - rank
 			pstats.append(pstat)
+			count+=1
+			ranks+=statsindexed[stat][player["name"]]["rank"]
+			weighted+=pstat["amount"] / totals[stat] * len(stats[stat])
 		player["stats"]=sorted(pstats, reverse=True, key=lambda x: x["imp_rating"])
+		player["avg_rank"]= ranks/count
+		player["weight"]=weighted
+		player["avg_weight"]=weighted/count
+		
+		
 		for i, stat in enumerate(player["stats"]):
 			stat["imp_rank"]=i+1
-
+	
 	if  verbosity > 0:
 		print("Loudly Judging...")
 	leaderboard=[]
@@ -516,6 +520,7 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 					pstat=(
 						player_line_template
 						.replace("{{Stat Name}}",stat["stat"])
+						.replace("{{competition}}",str(len(stats[stat["stat"]])))
 						.replace("{{Stat Name safe}}",urllib.parse.quote(stat["stat"]))
 						.replace("{{Stat rank}}",str(stat["rank"]))
 						.replace("{{Stat impv}}",str(stat["imp_rating"]))
@@ -542,6 +547,9 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 					.replace("{{name}}",player["name"])
 					.replace("{{stat line}}",htmlstats)
 					.replace("{{stat summary line}}",htmlsummary)
+					.replace("{{avg_rank}}",str(round(player["avg_rank"])))
+					.replace("{{stat weight}}",str(round(player["weight"])))
+					.replace("{{avg stat weight}}",str(round(player["avg_weight"],2)))
 					.replace("{{html title}}",html_title)
 				)
 					

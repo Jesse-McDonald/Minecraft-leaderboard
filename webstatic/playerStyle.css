@@ -1,5 +1,8 @@
-.unit_selector{
-	float:left;
+.head_stats {
+  display: flex;
+  justify-content: center;
+
+  gap: 4em;
 }
 body {
 	font-family: Arial, sans-serif;
@@ -36,7 +39,7 @@ radio label{
 }
 
 .GWR{
-	width:6em;
+	width:8em;
 }
 .rank{
 	width:3em;
@@ -50,6 +53,9 @@ radio label{
 	width:10em;
 }
 .percentage{
+	width:4em;
+}
+.competition{
 	width:4em;
 }
 
@@ -93,7 +99,7 @@ span#total{
 }
 body{
 	padding:0;
-	height:100%;
+	height:calc( 100% - 2em);
 	margin:0;
 	padding-left:2em;
 	padding-right: 2em;

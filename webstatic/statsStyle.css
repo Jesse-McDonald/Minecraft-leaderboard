@@ -80,7 +80,7 @@ span#total{
 }
 body{
 	padding:0;
-	height:100%;
+	height:calc( 100% - 1em);
 	margin:0;
 	padding-left:2em;
 }

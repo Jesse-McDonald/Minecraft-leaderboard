@@ -24,6 +24,7 @@
 		  <input type="radio" onchange="activateAmoledMode()" name="toggle" id="amoledMode"> 
 		  <label for="amoledMode" class="amoledmode" title="AMOLED Mode"></label>
 			</radio></h1>
+			<div class="head_stats">
 			<div class="unit_selector" >
 				<span>Raw</span>
 				<label class="toggle">
@@ -32,9 +33,10 @@
 				</label>
 				<span>Unit</span>
 			</div>
+			 <div>Average Rank: {{avg_rank}} </div> <div>Total Stat Weight: {{stat weight}} </div> <div> Average Weight: {{avg stat weight}}</div></div>
 			<input type="text" id="searchInput" placeholder="Filter by Stat">
 			<ul id="listContainer">
-					<li class="list-item header"><span class='GWR'>Achievement</span><span class='name'>Stat</span><span class='rank'>Rank</span><span class='number'>Stat Value</span><span class='percentage'>% of Total</span></li>
+					<li class="list-item header"><span class='GWR'>Achievement</span><span class='name'>Stat</span><span class='rank'>Rank</span><span class='number'>Stat Value</span><span class='percentage'>% of Total</span><span class='competition'>Comp.</span></li>
 	{{stat line}}
 </ul>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
