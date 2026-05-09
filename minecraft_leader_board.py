@@ -606,14 +606,117 @@ def main(input_dir=None,web=None, jsonA=None, text=None, clean = False, compress
 		if  verbosity > 0:
 				print("\twJSON:")
 		with Output(output, "api", compression)	as apiout: 
-			pass
+			if  verbosity > 0:
+				print("\t\tplayers...")
+			for player in players.values():
+
+				jsonstats={}
+				for stat in player["stats"]:
+					jsonstats[stat["stat"]]={
+						"name":stat["stat"],
+						"competition":len(stats[stat["stat"]])),
+						"rank":stat["rank"],
+						"impv":stat["imp_rating"],
+						"impr":stat["imp_rank"],
+						"amount":stat["amount"],
+						"amount_converted":convert(stat["stat"],stat["amount"]),
+						"percent":stat["amount"]/totals[stat["stat"]]*100
+					}
+	
+
+				jsonout={
+					"name":player["name"])
+					"stats":jsonstats,
+					"avg_rank":player["avg_rank"],
+					"weight":player["weight"]
+				
+
+				}
+					
+				apiout.write("player/"+player["name"]+".json",json.dumps(jsonout))
+			if  verbosity > 0:
+				print("\t\tstats...")	
+			for stat in stats:
+				jsonstats={}
+				for player in stats[stat]:
+				
+					jsonstats[player["name"]]={
+						"rank":statsindexed[stat][player["name"]]["rank"],
+						"name":,player["name"],
+						"raw":player["amount"],
+						"amount_converted":convert(stat,statsindexed[stat][player["name"]]["amount"]),
+						"percentage":player["amount"]/totals[stat]*100
+					}
+				jsonout={
+					"stat":stat,
+					"total":convert(stat,totals[stat]),
+					"total":totals[stat],
+					"players":jsonstats
+				}
+				apiout.write("stat/"+stat+".json",json.dumps(jsonout))
+			if  verbosity > 0:
+				print("\t\tleaderboard...")
+					
+			apiout.write("leaderboard.json",json.dumps(leaderboard))
 
 	if text:
 		if  verbosity > 0:
 			print("\twtext:")
 
 		with Output(output, "text", compression) as textout: 
-			pass
+			if  verbosity > 0:
+				print("\t\tplayers...")
+			for player in players.values():
+				textstats=""
+				for stat in player["stats"]:
+					pstat=", ".join((
+						stat["stat"],
+						str(stat["imp_rank"]),
+						str(stat["amount"]),
+						str(stat["rank"]),
+						str(round(stat["amount"]/totals[stat["stat"]]*100)),
+						str(len(stats[stat["stat"]]))
+					))
+					textstats+=pstat+"\n"
+				
+				textout=""+player["name"]+\
+					"| avg rank: "+round(player["avg_rank"])+\
+					"| weight: "+round(player["weight"])+\
+					"| avg weight: "+round(player["avg_weight"],2)+\
+					"\n\nachievement, stat name, amount, rank, percent, competition\n"+textstats
+
+				)
+				
+				textout.write("player/"+player["name"]+".txt",textout)
+			if  verbosity > 0:
+				print("\t\tstats...")	
+			for stat in stats:
+				textstats=""
+				for player in stats[stat]:
+					pstat=", ".join((
+						statsindexed[stat][player["name"]]["rank"],
+						player["name"],
+						player["amount"],
+						player["amount"]/totals[stat]*100,
+					))
+					textstats+=pstat
+					
+				textout=""+stat+" Total: "+ str(totals[stat])+\
+					"\n\nrank, player, amount, percent\n"+textstats
+				
+				textout.write("stat/"+stat+".txt",textout)
+			if  verbosity > 0:
+				print("\t\tleaderbaord...")
+					
+			leaderboardtxt=""
+			for stat in leaderboard:
+				leaderboardtxt+=stat["name"]+ ": "+ str(stat["total"])+"\n"+\
+					"\tmax: "+str(stat["max"]["amount"])+" "+str(stat["max"]["players"])+"\n"+\
+					"\tmin: "+str(stat["min"]["amount"])+" "+str(stat["min"]["players"])+"\n\n"
+			
+			textout.write("leaderboard.json",json.dumps(leaderboard))
+			#todo change leaderboard out
+
 	if clean: 
 		rmdir("cache") 
 	if  verbosity > 0:
